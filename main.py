@@ -36,7 +36,6 @@ async def main():
 
        # Perform data cleaning here
        cleaned_data = transform_census_data(raw_data)
-       print(f'Cleaned data: {cleaned_data.head(2)}')
 
        if cleaned_data.empty:
            raise ValueError("No cleaned data available after transformation.")
