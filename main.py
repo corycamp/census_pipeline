@@ -4,53 +4,57 @@ from utils.data_transformer import transform_census_data
 
 import asyncio
 
+
 def setup_data_connection():
-    print('Setting up database and client connection...')
+    print("Setting up database and client connection...")
     db_service = DBService()
     census_client = CensusClient()
 
     return [db_service, census_client]
 
+
 async def save_raw_data(db_service, census_client):
     census_data = await asyncio.to_thread(census_client.get_census_data)
-    print('Census data fetched successfully.')
-    
-    print('Inserting data into the database...')
-    await db_service.create_table('create_original_table', census_data)
+    print("Census data fetched successfully.")
+
+    print("Inserting data into the database...")
+    await db_service.create_table("create_original_table", census_data)
     db_service.close_db_connection()
-    
+
 
 async def main():
-   try:
-       print('########## Initializing ##########\n')
-       db_service, census_client = setup_data_connection()
-    #    await save_raw_data(db_service, census_client)
+    try:
+        print("########## Initializing ##########\n")
+        db_service, census_client = setup_data_connection()
+        #    await save_raw_data(db_service, census_client)
 
-       print('\n########## Initialization complete ##########\n')
+        print("\n########## Initialization complete ##########\n")
 
-       print('\n########## Cleaning Data ##########\n')
-       raw_data = await db_service.fetch_raw_census_data()
-       
-       if not raw_data:
-           raise ValueError("No raw data found in the database.")
+        print("\n########## Cleaning Data ##########\n")
+        raw_data = await db_service.fetch_raw_census_data()
 
-       # Perform data cleaning here
-       cleaned_data = transform_census_data(raw_data)
+        if not raw_data:
+            raise ValueError("No raw data found in the database.")
 
-       if cleaned_data.empty:
-           raise ValueError("No cleaned data available after transformation.")
-       
-       print('\n########## Inserting Cleaned Data ##########\n')
-    #    await db_service.create_table('create_cleaned_table', cleaned_data)
-    #    print('Cleaned data inserted successfully.')
+        # Perform data cleaning here
+        cleaned_data = transform_census_data(raw_data)
 
-       db_service.close_db_connection()
-       print('\n########## Connection closed successfully ##########\n')
+        if cleaned_data.empty:
+            raise ValueError("No cleaned data available after transformation.")
+
+        print("\n########## Inserting Cleaned Data ##########\n")
+        #    await db_service.create_table('create_cleaned_table', cleaned_data)
+        #    print('Cleaned data inserted successfully.')
+
+        cleaned_data.info()
+
+        await db_service.load_clean_data_into_db(cleaned_data)
+        db_service.close_db_connection()
+        print("\n########## Connection closed successfully ##########\n")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 
-   except Exception as e:
-       print(f"An error occurred: {e}")
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())

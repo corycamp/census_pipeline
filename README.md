@@ -15,3 +15,17 @@ When the pipeline runs, the full dataset will be gathered from the API. Seeing a
 - Pull data from cenus.gov API
 - Read data into Original Table on initial load
 - Clean and Standardized data pulled from Original into Formatted Table
+
+## Data Cleaning
+
+Converted the 2D array coming from the API into a panda dataframe for easier manipulation. After converting, the following changes were done:
+
+- Reformatted the data to have the first array from the API be the column names
+
+- Added a original_serial_id column to match the serial number of the transformed data with the raw data in the Postgres table for tracking
+
+- Removed duplicate state columns and renamed the county column to county_fips_code (Five digit unique numerical identifier used to identify U.S. counties)
+
+- Kept the abbreviations for the states, renamed that column to 'states'.
+
+- Removed the time and country column
